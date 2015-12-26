@@ -1,5 +1,9 @@
 from RiotAPI import RiotAPI
 from tkinter import *
+import RiotConsts as Consts
+import requests
+import urllib
+import base64
 
 
 class App(object):
@@ -11,7 +15,7 @@ class App(object):
 
     def current_game(self, master):
 
-        #Defining/Packing frames
+        # Defining/Packing frames
         menu_buttons = Frame(master, width=75, height=450, bg='#0f0')
         menu_buttons.pack(side=LEFT)
         namely = Frame(master, width=600, height=25, bg='#0aa', padx=30, pady=15)
@@ -21,7 +25,7 @@ class App(object):
         meaty.pack(side=RIGHT)
         meaty.grid_propagate(0)
 
-        #Defining/Gridding buttons
+        # Defining/Gridding buttons
         current_game_button = Button(menu_buttons, width=10, height=10, bg='#5153B5')
         current_game_button.grid(row=1)
         ranked_stats_button = Button(menu_buttons, width=10, height=10, bg='#5153B5')
@@ -29,31 +33,41 @@ class App(object):
         match_history_button = Button(menu_buttons, width=10, height=10, bg='#5153B5')
         match_history_button.grid(row=3)
 
-        #Defining/Gridding summoner name field
+        # Defining/Gridding summoner name field
         summoner_name_entry = Entry(namely)
         summoner_name_entry.grid(row=0, pady=10)
         summoner_name_button = Button(namely,
                                       text="Get Summoner Game",
                                       bg='#5aa',
-                                      command=lambda: self.get_summoner_data(summoner_name_entry.get(), meaty))
+                                      command=lambda: self.get_summoner_data(summoner_name_entry.get(),
+                                                                             region='europe_west'))
         summoner_name_button.grid(row=1)
 
-    def get_summoner_data(self, name, region, meaty):
+    def get_summoner_data(self, name, region):
         api = RiotAPI('47fb4460-e2bd-47b5-9136-8c146d4e1ebb')
         summoner_id = api.get_summoner_by_name(name)[name.lower()]['id']
         print(summoner_id)
-        #Label(meaty, text=summoner_id).grid()
+        # Label(meaty, text=summoner_id).grid()
         current_game = api.get_current_game(summoner_id)["participants"]
         for i in range(len(current_game)):
+            champion_data = api.get_champion_data(current_game[i]['championId'])
+            print(champion_data)
+            raw_data = urllib.request.urlopen(Consts.URL['data_dragon'].format(
+                                                version=Consts.API_VERSIONS['data_dragon'],
+                                                champion=champion_data['image']['full'])).read()
+            b64_data = base64.encodebytes(raw_data)
+            champion_image = PhotoImage(data=b64_data)
+
+            print(champion_image)
             if i < 5:
                 print(current_game[i]["summonerName"])
                 Label(meaty, text=current_game[i]["summonerName"], fg='blue').grid(column=i, row=0, padx=30, pady=20)
+                Label(meaty, image=champion_image).grid(column=i, row=1)
             else:
                 print(current_game[i]["summonerName"])
-                Label(meaty, text=current_game[i]["summonerName"], fg='red').grid(column=i-5, row=1, pady=130)
+                Label(meaty, text=current_game[i]["summonerName"], fg='red').grid(column=i-5, row=2, pady=130)
         meaty.pack(side=RIGHT)
         print(current_game)
-
 
 
 root = Tk()
