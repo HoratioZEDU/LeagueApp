@@ -7,8 +7,8 @@ import base64
 global champion_image
 champion_image = []
 
-class App(object):
 
+class App(object):
 
     def __init__(self, master):
 
@@ -52,23 +52,28 @@ class App(object):
         # Label(meaty, text=summoner_id).grid()
         current_game = api.get_current_game(summoner_id)["participants"]
         for i in range(len(current_game)):
-            champion_data = api.get_champion_data(current_game[i]['championId'])
+            champion_data = api.get_champion_data(current_game[i]["championId"])
             print(champion_data)
             raw_data = urllib.request.urlopen(Consts.URL['data_dragon'].format(
                                                 version=Consts.API_VERSIONS['data_dragon'],
                                                 champion=champion_data['image']['full'])).read()
             b64_data = base64.encodebytes(raw_data)
             champion_image.append(PhotoImage(data=b64_data))
-
             print(champion_image)
+            ally_id = current_game[i]["summonerId"]
+            league = api.get_league_data(ally_id)[str(ally_id)][0]["tier"]
             if i < 5:
-                champion_image[i] = champion_image[i].subsample(2,2)
+                champion_image[i] = champion_image[i].subsample(2, 2)
                 print(current_game[i]["summonerName"])
-                Label(meaty, text=current_game[i]["summonerName"], fg='blue').grid(column=i, row=0, padx=30, pady=20)
+                Label(meaty, text=current_game[i]["summonerName"], fg='blue').grid(column=i, row=0, padx=22, pady=20)
                 Label(meaty, image=champion_image[i]).grid(column=i, row=1)
+                Label(meaty, text=league).grid(column=i, row=2)
             else:
+                champion_image[i] = champion_image[i].subsample(2, 2)
                 print(current_game[i]["summonerName"])
-                Label(meaty, text=current_game[i]["summonerName"], fg='red').grid(column=i-5, row=2, pady=130)
+                Label(meaty, text=current_game[i]["summonerName"], fg='red').grid(column=i-5, row=3, pady=20)
+                Label(meaty, image=champion_image[i]).grid(column=i-5, row=4)
+                Label(meaty, text=league).grid(column=i-5, row=5)
         meaty.pack(side=RIGHT)
         print(current_game)
 

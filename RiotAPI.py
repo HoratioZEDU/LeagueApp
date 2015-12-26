@@ -43,3 +43,10 @@ class RiotAPI(object):
             id=championId
         )
         return self._request(api_url, 'global', params={'champData': 'image'})
+
+    def get_league_data(self, summoner_id):
+        api_url = Consts.URL['league_data'].format(
+            region=self.region,
+            summonerId=summoner_id
+        )
+        return self._request(api_url, self.region)
