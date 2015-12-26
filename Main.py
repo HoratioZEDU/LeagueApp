@@ -1,12 +1,14 @@
 from RiotAPI import RiotAPI
 from tkinter import *
 import RiotConsts as Consts
-import requests
 import urllib
 import base64
 
+global champion_image
+champion_image = []
 
 class App(object):
+
 
     def __init__(self, master):
 
@@ -56,13 +58,14 @@ class App(object):
                                                 version=Consts.API_VERSIONS['data_dragon'],
                                                 champion=champion_data['image']['full'])).read()
             b64_data = base64.encodebytes(raw_data)
-            champion_image = PhotoImage(data=b64_data)
+            champion_image.append(PhotoImage(data=b64_data))
 
             print(champion_image)
             if i < 5:
+                champion_image[i] = champion_image[i].subsample(2,2)
                 print(current_game[i]["summonerName"])
                 Label(meaty, text=current_game[i]["summonerName"], fg='blue').grid(column=i, row=0, padx=30, pady=20)
-                Label(meaty, image=champion_image).grid(column=i, row=1)
+                Label(meaty, image=champion_image[i]).grid(column=i, row=1)
             else:
                 print(current_game[i]["summonerName"])
                 Label(meaty, text=current_game[i]["summonerName"], fg='red').grid(column=i-5, row=2, pady=130)
